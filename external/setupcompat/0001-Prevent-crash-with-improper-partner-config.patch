@@ -1,0 +1,24 @@
+From 0450c92cbe5c75cc31d4cdc0958918836b28ca53 Mon Sep 17 00:00:00 2001
+From: Pranav Vashi <neobuddy89@gmail.com>
+Date: Sun, 20 Mar 2022 11:00:08 +0530
+Subject: [PATCH] Prevent crash with improper partner config
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+Change-Id: Ife0dd1d87e8aa9eb7fd2c7c94e54131071dcd862
+---
+ .../android/setupcompat/template/FooterButtonStyleUtils.java    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/main/java/com/google/android/setupcompat/template/FooterButtonStyleUtils.java b/main/java/com/google/android/setupcompat/template/FooterButtonStyleUtils.java
+index ef2aa6b..1c7be2a 100644
+--- a/main/java/com/google/android/setupcompat/template/FooterButtonStyleUtils.java
++++ b/main/java/com/google/android/setupcompat/template/FooterButtonStyleUtils.java
+@@ -420,7 +420,7 @@ private static void saveButtonDefaultTextColor(Button button) {
+ 
+   private static ColorStateList getButtonDefaultTextCorlor(Button button) {
+     if (!defaultTextColor.containsKey(button.getId())) {
+-      throw new IllegalStateException("There is no saved default color for button");
++      return button.getTextColors();
+     }
+     return defaultTextColor.get(button.getId());
+   }

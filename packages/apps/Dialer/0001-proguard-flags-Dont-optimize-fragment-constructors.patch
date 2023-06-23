@@ -1,0 +1,34 @@
+From e2b6a46f1f477d68e83210823fef1e4c85cddb3f Mon Sep 17 00:00:00 2001
+From: Aayush Gupta <aayushgupta219@gmail.com>
+Date: Tue, 6 Sep 2022 08:56:29 +0000
+Subject: [PATCH] proguard.flags: Don't optimize fragment constructors
+
+09-03 13:08:51.712  4496  4496 E MessageQueue-JNI: Exception in MessageQueue callback: handleReceiveCallback
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI: android.app.Fragment$InstantiationException: Unable to instantiate fragment com.android.dialer.app.settings.DisplayOptionsSettingsFragment: calling Fragment constructor caused an exception
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI:      at android.app.Fragment.instantiate(Fragment.java:565)
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI:      at android.preference.PreferenceActivity.switchToHeaderInner(PreferenceActivity.java:1245)
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI:      at android.preference.PreferenceActivity.switchToHeader(PreferenceActivity.java:1296)
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI:      at android.preference.PreferenceActivity.onHeaderClick(PreferenceActivity.java:1093)
+09-03 13:08:51.713  4496  4496 E MessageQueue-JNI:      at com.android.dialer.app.settings.DialerSettingsActivity.onHeaderClick(DialerSettingsActivity.java:45)
+
+Signed-off-by: Aayush Gupta <aayushgupta219@gmail.com>
+Change-Id: Idef793065ea422e7506f943bc76cd20e60e0a271
+---
+ proguard.flags | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/proguard.flags b/proguard.flags
+index 160020b1d..cb80337cf 100644
+--- a/proguard.flags
++++ b/proguard.flags
+@@ -1,4 +1,8 @@
+ # These are referenced by com.google.common.util.concurrent and
+ # com.google.errorprone.annotations but don't exist on Android.
+ -dontwarn java.lang.ClassValue
+--dontwarn javax.lang.model.element.Modifier
+\ No newline at end of file
++-dontwarn javax.lang.model.element.Modifier
++
++-keep public class * extends android.app.Fragment {
++  public <init>();
++}

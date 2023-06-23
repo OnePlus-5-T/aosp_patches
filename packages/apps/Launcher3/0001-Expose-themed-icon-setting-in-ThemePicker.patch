@@ -1,0 +1,27 @@
+From ae554824de2d035c932c131509572f48888f696e Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Fri, 23 Jun 2023 19:31:11 +0200
+Subject: [PATCH] Expose themed icon setting in ThemePicker
+
+Change-Id: I74bfcd8903b6a1df96a68ed2c0626d1f341dcef3
+---
+ quickstep/AndroidManifest-launcher.xml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/quickstep/AndroidManifest-launcher.xml b/quickstep/AndroidManifest-launcher.xml
+index 7d7054f..d2955c4 100644
+--- a/quickstep/AndroidManifest-launcher.xml
++++ b/quickstep/AndroidManifest-launcher.xml
+@@ -66,6 +66,9 @@
+             <meta-data
+                 android:name="com.android.launcher3.grid.control"
+                 android:value="${packageName}.grid_control" />
++            <meta-data
++                android:name="com.android.launcher3.themedicon.option"
++                android:value="${packageName}.grid_control" />
+         </activity>
+ 
+     </application>
+-- 
+2.34.1
+

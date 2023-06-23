@@ -1,0 +1,68 @@
+From cdd82afc1a3a0de0d15cadf4c69d26a68a524c64 Mon Sep 17 00:00:00 2001
+From: Roberto Sartori <roberto.sartori.android@gmail.com>
+Date: Mon, 19 Jun 2023 17:23:19 +0200
+Subject: [PATCH] libusbhost: improve usb_device_open handling
+
+This method is used whenever Android tries to access a device using the
+USB host API.
+
+I found a situation where this method was not able to actually provide
+access to a USB device, even if the USB device was present.
+
+Using a portable DAC (Sabaj DA3), this happens:
+- DAC is plugged in to the phone,
+- on Linux, the USB device nodes are created in '/dev/bus/usb/00X/00Y'
+- with that specific DAC, 3 nodes are created: 001, 002 and 003
+- node 002, for some reason, disappears almost immediately after its
+  creation. The actual node that we need is 003
+- due to how the usb_device_open method was managing the situation,
+  there was a one (1) second timeout before actually failing and
+returning
+- before returning, the libusbhost was still actually calling the 'open'
+  method on a file that didn't exist anymore.
+
+The fix for this is pretty simple: just check if the file exists as
+first thing. If it doesn't, return immediately without doing anything
+else.
+
+While we are there, also move the 'sleep' before all the checks: if we
+are waiting for the permissions to be correctly set, it makes sense to
+wait before checking them. Otherwise, the first verification will most
+likely fail.
+
+Change-Id: Ic2d3a4c0f6d2d806b9b214f519d14f7e83e709b4
+Signed-off-by: Roberto Sartori <roberto.sartori.android@gmail.com>
+---
+ libusbhost/usbhost.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/libusbhost/usbhost.c b/libusbhost/usbhost.c
+index d8f15cd6c..692fab4dd 100644
+--- a/libusbhost/usbhost.c
++++ b/libusbhost/usbhost.c
+@@ -326,7 +326,11 @@ struct usb_device *usb_device_open(const char *dev_name)
+      * be triggered by the perm change via inotify rather than polling.
+      */
+     for (attempts = 0; attempts < MAX_ATTEMPTS; ++attempts) {
+-        if (access(dev_name, R_OK | W_OK) == 0) {
++        usleep(SLEEP_BETWEEN_ATTEMPTS_US);
++        if (access(dev_name, F_OK) != 0) {
++            D("usb_device does not exist\n");
++            return NULL;
++        } else if (access(dev_name, R_OK | W_OK) == 0) {
+             writeable = 1;
+             break;
+         } else {
+@@ -336,9 +340,6 @@ struct usb_device *usb_device_open(const char *dev_name)
+                 break;
+             }
+         }
+-        /* not writeable or readable - sleep and try again. */
+-        D("usb_device_open no access sleeping\n");
+-        usleep(SLEEP_BETWEEN_ATTEMPTS_US);
+     }
+ 
+     if (writeable) {
+-- 
+2.34.1
+

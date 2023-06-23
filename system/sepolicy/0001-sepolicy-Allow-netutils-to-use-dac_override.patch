@@ -1,0 +1,80 @@
+From 603376a760410fff696188026852a2a220335fb6 Mon Sep 17 00:00:00 2001
+From: TheScarastic <warabhishek@gmail.com>
+Date: Fri, 23 Jun 2023 19:20:39 +0200
+Subject: [PATCH] sepolicy: Allow netutils to use dac_override
+
+Change-Id: I9e5e56f14d2f3c475d45049f677412d94c941d1d
+---
+ prebuilts/api/33.0/private/domain.te           | 1 +
+ prebuilts/api/33.0/private/netutils_wrapper.te | 5 ++++-
+ private/domain.te                              | 1 +
+ private/netutils_wrapper.te                    | 5 ++++-
+ 4 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/prebuilts/api/33.0/private/domain.te b/prebuilts/api/33.0/private/domain.te
+index bcb9d52..61822a1 100644
+--- a/prebuilts/api/33.0/private/domain.te
++++ b/prebuilts/api/33.0/private/domain.te
+@@ -378,6 +378,7 @@ define(`dac_override_allowed', `{
+   lmkd
+   migrate_legacy_obb_data
+   netd
++  netutils_wrapper
+   postinstall_dexopt
+   recovery
+   rss_hwm_reset
+diff --git a/prebuilts/api/33.0/private/netutils_wrapper.te b/prebuilts/api/33.0/private/netutils_wrapper.te
+index 900b35c..36bee53 100644
+--- a/prebuilts/api/33.0/private/netutils_wrapper.te
++++ b/prebuilts/api/33.0/private/netutils_wrapper.te
+@@ -30,6 +30,9 @@ allow netutils_wrapper { fs_bpf fs_bpf_netd_shared }:file read;
+ allow netutils_wrapper { fs_bpf                    }:file write;
+ allow netutils_wrapper bpfloader:bpf prog_run;
+ 
++# For q vendor haxx
++allow netutils_wrapper self:capability dac_override;
++
+ # For /data/misc/net access to ndc and ip
+ r_dir_file(netutils_wrapper, net_data_file)
+ 
+@@ -44,4 +47,4 @@ dontaudit netutils_wrapper self:global_capability_class_set sys_resource;
+ dontaudit netutils_wrapper sysfs_type:file read;
+ 
+ # netutils wrapper may only use the following capabilities.
+-neverallow netutils_wrapper self:global_capability_class_set ~{ net_admin net_raw };
++neverallow netutils_wrapper self:global_capability_class_set ~{ net_admin net_raw dac_override };
+diff --git a/private/domain.te b/private/domain.te
+index bcb9d52..61822a1 100644
+--- a/private/domain.te
++++ b/private/domain.te
+@@ -378,6 +378,7 @@ define(`dac_override_allowed', `{
+   lmkd
+   migrate_legacy_obb_data
+   netd
++  netutils_wrapper
+   postinstall_dexopt
+   recovery
+   rss_hwm_reset
+diff --git a/private/netutils_wrapper.te b/private/netutils_wrapper.te
+index 900b35c..36bee53 100644
+--- a/private/netutils_wrapper.te
++++ b/private/netutils_wrapper.te
+@@ -30,6 +30,9 @@ allow netutils_wrapper { fs_bpf fs_bpf_netd_shared }:file read;
+ allow netutils_wrapper { fs_bpf                    }:file write;
+ allow netutils_wrapper bpfloader:bpf prog_run;
+ 
++# For q vendor haxx
++allow netutils_wrapper self:capability dac_override;
++
+ # For /data/misc/net access to ndc and ip
+ r_dir_file(netutils_wrapper, net_data_file)
+ 
+@@ -44,4 +47,4 @@ dontaudit netutils_wrapper self:global_capability_class_set sys_resource;
+ dontaudit netutils_wrapper sysfs_type:file read;
+ 
+ # netutils wrapper may only use the following capabilities.
+-neverallow netutils_wrapper self:global_capability_class_set ~{ net_admin net_raw };
++neverallow netutils_wrapper self:global_capability_class_set ~{ net_admin net_raw dac_override };
+-- 
+2.34.1
+
