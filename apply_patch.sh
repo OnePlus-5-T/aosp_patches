@@ -40,6 +40,7 @@ for patch_file in $patch_files; do
       echo "Patch already applied for $project_name. Proceeding to the next patch."
     fi
 
+    git fetch --unshallow aosp
     git checkout "$aosp_tag"
     if [ $? -eq 0 ]; then
       echo "Checked out AOSP tag $aosp_tag successfully."
