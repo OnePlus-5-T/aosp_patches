@@ -1,0 +1,35 @@
+From 2265f873653b5a8af7d13ffd8ee056a3ae98c889 Mon Sep 17 00:00:00 2001
+From: me-cafebabe <me_cafebabe@hotmail.com>
+Date: Tue, 4 Oct 2022 12:41:16 +0000
+Subject: [PATCH] first_stage_mount: Skip dm-verity setup if AVB is not enabled
+
+Change-Id: Ia06e94e91cf5fdce14ce37eb85fdd95df1d059bc
+---
+ init/first_stage_mount.cpp | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/init/first_stage_mount.cpp b/init/first_stage_mount.cpp
+index d0f68a80c2..8cf7a89e46 100644
+--- a/init/first_stage_mount.cpp
++++ b/init/first_stage_mount.cpp
+@@ -425,9 +425,14 @@ bool FirstStageMountVBootV2::MountPartition(const Fstab::iterator& begin, bool e
+             return false;
+         }
+     }
+-    if (!SetUpDmVerity(&(*begin))) {
+-        PLOG(ERROR) << "Failed to setup verity for '" << begin->mount_point << "'";
+-        return false;
++
++    if (begin->fs_mgr_flags.avb) {
++        if (!SetUpDmVerity(&(*begin))) {
++            PLOG(ERROR) << "Failed to setup verity for '" << begin->mount_point << "'";
++            return false;
++        }
++    } else {
++        LOG(INFO) << "AVB is not enabled, skip verity setup for '" << begin->mount_point << "'";
+     }
+ 
+     bool mounted = (fs_mgr_do_mount_one(*begin) == 0);
+-- 
+2.34.1
+
